@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      position: relative;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+</body>
+<script>
+  const spawnLenda = ({ imgSrc, imgWidth, imgHeight, left, top, speed }) => {
+    const lenda = document.createElement("img");
+    lenda.src = imgSrc
+
+    lenda.width = imgWidth
+    lenda.height = imgHeight
+
+
+    lenda.speed = speed
+    lenda.speedX = speed
+    lenda.speedY = speed
+    lenda.style.position = 'absolute';
+
+    lenda.setLeft = function (left) {
+      this.left = left
+      this.style.left = `${left}px`
+    }
+
+    lenda.setTop = function (top) {
+      this.top = top
+      this.style.top = `${top}px`
+    }
+
+    lenda.setLeft(left)
+    lenda.setTop(top)
+
+    lenda.play = function () {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      const newLeft = this.left + this.speedX;
+      const newTop = this.top + this.speedY;
+
+      this.setLeft(newLeft)
+      this.setTop(newTop)
+
+      if (newLeft + this.width >= w) {
+        this.speedX = -this.speed;
+      }
+      if (newLeft <= 0) {
+        this.speedX = this.speed;
+      }
+
+      if (newTop + this.height >= h) {
+        this.speedY = -this.speed;
+      }
+      if (newTop <= 0) {
+        this.speedY = this.speed;
+      }
+
+      window.requestAnimationFrame(() => this.play());
+    }
+
+    document.body.appendChild(lenda)
+    window.requestAnimationFrame(() => lenda.play());
+  }
+
+  spawnLenda({
+    imgSrc: 'https://cdn.discordapp.com/attachments/595787105154891786/806982826272620574/vacilao.png',
+    imgWidth: 150,
+    imgHeight: 160,
+    left: 0,
+    top: 0,
+    speed: 2
+  })
+
+  document.addEventListener('click', (e) => {
+    const escala = Math.random() * 2
+    spawnLenda({
+      imgSrc: 'https://cdn.discordapp.com/attachments/595787105154891786/806982826272620574/vacilao.png',
+      imgWidth: 150 * escala,
+      imgHeight: 150 * escala,
+      left: e.clientX,
+      top: e.clientY,
+      speed: parseInt(1 + (Math.random() * 10))
+    })
+  })
+</script>
+
+</html>
