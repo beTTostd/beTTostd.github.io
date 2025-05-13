@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Resize and Crop Images</title>
+  <title>Resize e Crop para 2000x3000</title>
 </head>
 <body>
   <h2>Redimensionar e cortar imagens para 2000x3000</h2>
@@ -24,20 +24,36 @@
         reader.onload = function(event) {
           const img = new Image();
           img.onload = function() {
-            const size = Math.min(img.width, img.height);
-            const offsetX = (img.width - size) / 2;
-            const offsetY = (img.height - size) / 2;
+            const targetAspect = 2 / 3; // 2000 / 3000
 
+            let cropWidth = img.width;
+            let cropHeight = img.height;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            const imgAspect = img.width / img.height;
+
+            // Ajustar para cortar no centro com proporção 2:3
+            if (imgAspect > targetAspect) {
+              // imagem mais larga que o necessário
+              cropWidth = img.height * targetAspect;
+              offsetX = (img.width - cropWidth) / 2;
+            } else {
+              // imagem mais alta que o necessário
+              cropHeight = img.width / targetAspect;
+              offsetY = (img.height - cropHeight) / 2;
+            }
+
+            // Criar canvas com 2000x3000
             const canvas = document.createElement('canvas');
             canvas.width = 2000;
             canvas.height = 3000;
             const ctx = canvas.getContext('2d');
 
-            // Desenhar imagem cortada e redimensionada
             ctx.drawImage(
               img,
-              offsetX, offsetY, size, size, // origem (crop)
-              0, 0, 2000, 3000              // destino (resize)
+              offsetX, offsetY, cropWidth, cropHeight,
+              0, 0, 2000, 3000
             );
 
             // Criar link para download
