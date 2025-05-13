@@ -5,7 +5,7 @@
   <title>Resize and Crop Images</title>
 </head>
 <body>
-  <h2>Redimensionar e cortar imagens para 1000x1000</h2>
+  <h2>Redimensionar e cortar imagens para 2000x3000</h2>
   <input type="file" id="fileInput" multiple accept="image/*">
   <div id="result"></div>
 
@@ -29,15 +29,15 @@
             const offsetY = (img.height - size) / 2;
 
             const canvas = document.createElement('canvas');
-            canvas.width = 1000;
-            canvas.height = 1000;
+            canvas.width = 2000;
+            canvas.height = 3000;
             const ctx = canvas.getContext('2d');
 
             // Desenhar imagem cortada e redimensionada
             ctx.drawImage(
               img,
               offsetX, offsetY, size, size, // origem (crop)
-              0, 0, 1000, 1000              // destino (resize)
+              0, 0, 2000, 3000              // destino (resize)
             );
 
             // Criar link para download
@@ -45,7 +45,7 @@
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
               link.href = url;
-              link.download = 'imagem_1000x1000_' + file.name;
+              link.download = 'imagem_2000x3000_' + file.name;
               link.textContent = 'Download ' + file.name;
               link.style.display = 'block';
               resultDiv.appendChild(link);
