@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tmux Hotkeys Guide</title>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e94560;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 15, 40, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid #0f3460;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00d2ff;
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            margin: 0;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #a8a8a8;
+            margin: 10px 0 0 0;
+        }
+        
+        .prefix-note {
+            background: linear-gradient(45deg, #e94560, #ff6b9d);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3);
+        }
+        
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .section {
+            background: linear-gradient(145deg, #0f3460, #1a1a2e);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #2a4f7f;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 210, 255, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #00d2ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            font-size: 1.2em;
+        }
+        
+        .command {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid #e94560;
+            transition: all 0.3s ease;
+        }
+        
+        .command:hover {
+            background: rgba(233, 69, 96, 0.1);
+            transform: translateX(5px);
+            border-left-color: #00d2ff;
+        }
+        
+        .hotkey {
+            font-weight: bold;
+            color: #00d2ff;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #00d2ff;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+        
+        .description {
+            color: #ffffff;
+            font-size: 0.95em;
+        }
+        
+        .most-used {
+            grid-column: 1 / -1;
+            background: linear-gradient(145deg, #e94560, #ff6b9d);
+            color: white;
+        }
+        
+        .most-used .section-title {
+            color: white;
+        }
+        
+        .most-used .hotkey {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: white;
+        }
+        
+        .most-used .command {
+            border-left-color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .most-used .command:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .command {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">tmux</h1>
+            <p class="subtitle">Guia Visual de Hotkeys Básicas</p>
+        </div>
+        
+        <div class="prefix-note">
+            🔑 Prefixo padrão: <strong>Ctrl+b</strong> (pressione e solte, depois a segunda tecla)
+        </div>
+        
+        <div class="sections">
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">🔄</span>
+                    Sessões
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + d</span>
+                    <span class="description">desconectar (detach)</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + s</span>
+                    <span class="description">lista de sessões</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + (</span>
+                    <span class="description">sessão anterior</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + )</span>
+                    <span class="description">próxima sessão</span>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">🗂️</span>
+                    Janelas
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + c</span>
+                    <span class="description">criar nova janela</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + n</span>
+                    <span class="description">próxima janela</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + p</span>
+                    <span class="description">janela anterior</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + l</span>
+                    <span class="description">última janela</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + 0-9</span>
+                    <span class="description">janela específica</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + w</span>
+                    <span class="description">lista de janelas</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + ,</span>
+                    <span class="description">renomear janela</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + &</span>
+                    <span class="description">fechar janela</span>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">⬜</span>
+                    Painéis
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + "</span>
+                    <span class="description">dividir horizontal</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + %</span>
+                    <span class="description">dividir vertical</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + setas</span>
+                    <span class="description">navegar painéis</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + o</span>
+                    <span class="description">próximo painel</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + ;</span>
+                    <span class="description">último painel</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + q</span>
+                    <span class="description">números dos painéis</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + x</span>
+                    <span class="description">fechar painel</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + z</span>
+                    <span class="description">maximizar painel</span>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">📋</span>
+                    Modo Cópia
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + [</span>
+                    <span class="description">entrar modo cópia</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">q ou Esc</span>
+                    <span class="description">sair modo cópia</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Space</span>
+                    <span class="description">iniciar seleção</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Enter</span>
+                    <span class="description">copiar seleção</span>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">ℹ️</span>
+                    Ajuda & Info
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + ?</span>
+                    <span class="description">mostrar todas hotkeys</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + :</span>
+                    <span class="description">modo comando</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + t</span>
+                    <span class="description">mostrar relógio</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + i</span>
+                    <span class="description">info da janela</span>
+                </div>
+            </div>
+            
+            <div class="section most-used">
+                <div class="section-title">
+                    <span class="icon">🎯</span>
+                    Mais Usadas no Dia a Dia
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + c</span>
+                    <span class="description">nova janela</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + "</span>
+                    <span class="description">dividir horizontal</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + %</span>
+                    <span class="description">dividir vertical</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + setas</span>
+                    <span class="description">navegar painéis</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + n/p</span>
+                    <span class="description">trocar janelas</span>
+                </div>
+                <div class="command">
+                    <span class="hotkey">Ctrl+b + d</span>
+                    <span class="description">sair (detach)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
