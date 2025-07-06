@@ -1,77 +1,392 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Resize e Crop para 2000x3000</title>
+  <title>Resize e Crop para 1000x1500</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+    .upload-area:hover {
+      border-color: #007bff;
+    }
+    .upload-area.dragover {
+      border-color: #007bff;
+      background-color: #f0f8ff;
+    }
+    #fileInput {
+      display: none;
+    }
+    .upload-btn {
+      background: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    .upload-btn:hover {
+      background: #0056b3;
+    }
+    .progress {
+      margin: 20px 0;
+      text-align: center;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .download-all {
+      background: #28a745;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 18px;
+      margin: 20px 0;
+      width: 100%;
+      transition: background 0.3s;
+    }
+    .download-all:hover {
+      background: #1e7e34;
+    }
+    .download-all:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    .image-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .image-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+    .image-preview {
+      width: 100px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .download-link {
+      display: inline-block;
+      background: #17a2b8;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    .download-link:hover {
+      background: #138496;
+    }
+    .stats {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <h2>Redimensionar e cortar imagens para 2000x3000</h2>
-  <input type="file" id="fileInput" multiple accept="image/*">
-  <div id="result"></div>
+  <div class="container">
+    <h2>Redimensionar e cortar imagens para 1000x1500</h2>
+    
+    <div class="format-selector" style="margin-bottom: 20px; text-align: center;">
+      <label for="outputFormat" style="font-weight: bold; margin-right: 15px; color: #333;">
+        Formato de saída:
+      </label>
+      <select id="outputFormat" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; background: white;">
+        <option value="jpeg" selected>JPEG (menor tamanho)</option>
+        <option value="webp">WebP (melhor qualidade)</option>
+      </select>
+    </div>
 
+    <div class="upload-area" id="uploadArea">
+      <p>Arraste e solte suas imagens aqui ou</p>
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+        Escolher Arquivos
+      </button>
+      <input type="file" id="fileInput" multiple accept="image/*">
+      <p style="font-size: 14px; color: #666; margin-top: 15px;">
+        Formatos suportados: JPG, PNG, GIF, WebP
+      </p>
+    </div>
+
+    <div class="progress" id="progress" style="display: none;"></div>
+    
+    <div class="stats" id="stats" style="display: none;"></div>
+    
+    <button class="download-all" id="downloadAllBtn" style="display: none;" onclick="downloadAll()">
+      📦 Baixar Todas as Imagens (ZIP)
+    </button>
+    
+    <div class="image-list" id="result"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
     const fileInput = document.getElementById('fileInput');
     const resultDiv = document.getElementById('result');
+    const progressDiv = document.getElementById('progress');
+    const statsDiv = document.getElementById('stats');
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const uploadArea = document.getElementById('uploadArea');
+    const outputFormat = document.getElementById('outputFormat');
+    
+    let processedImages = [];
+    let totalFiles = 0;
+    let processedFiles = 0;
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+      if (files.length > 0) {
+        fileInput.files = createFileList(files);
+        handleFiles();
+      }
+    });
 
     fileInput.addEventListener('change', handleFiles);
 
+    function createFileList(files) {
+      const dt = new DataTransfer();
+      files.forEach(file => dt.items.add(file));
+      return dt.files;
+    }
+
     function handleFiles() {
       const files = Array.from(fileInput.files);
-      resultDiv.innerHTML = '';
+      if (files.length === 0) return;
 
-      files.forEach(file => {
+      totalFiles = files.length;
+      processedFiles = 0;
+      processedImages = [];
+      resultDiv.innerHTML = '';
+      
+      progressDiv.style.display = 'block';
+      statsDiv.style.display = 'block';
+      downloadAllBtn.style.display = 'none';
+      
+      updateProgress();
+      updateStats();
+
+      files.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(event) {
           const img = new Image();
           img.onload = function() {
-            const targetAspect = 2 / 3; // 2000 / 3000
-
-            let cropWidth = img.width;
-            let cropHeight = img.height;
-            let offsetX = 0;
-            let offsetY = 0;
-
-            const imgAspect = img.width / img.height;
-
-            // Ajustar para cortar no centro com proporção 2:3
-            if (imgAspect > targetAspect) {
-              // imagem mais larga que o necessário
-              cropWidth = img.height * targetAspect;
-              offsetX = (img.width - cropWidth) / 2;
-            } else {
-              // imagem mais alta que o necessário
-              cropHeight = img.width / targetAspect;
-              offsetY = (img.height - cropHeight) / 2;
-            }
-
-            // Criar canvas com 2000x3000
-            const canvas = document.createElement('canvas');
-            canvas.width = 2000;
-            canvas.height = 3000;
-            const ctx = canvas.getContext('2d');
-
-            ctx.drawImage(
-              img,
-              offsetX, offsetY, cropWidth, cropHeight,
-              0, 0, 2000, 3000
-            );
-
-            // Criar link para download
-            canvas.toBlob(blob => {
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = 'imagem_2000x3000_' + file.name;
-              link.textContent = 'Download ' + file.name;
-              link.style.display = 'block';
-              resultDiv.appendChild(link);
-            }, 'image/jpeg');
+            processImage(img, file, index);
           };
           img.src = event.target.result;
         };
         reader.readAsDataURL(file);
       });
     }
+
+    function processImage(img, file, index) {
+      const targetAspect = 2 / 3; // 1000 / 1500
+
+      let cropWidth = img.width;
+      let cropHeight = img.height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      const imgAspect = img.width / img.height;
+
+      // Ajustar para cortar no centro com proporção 2:3
+      if (imgAspect > targetAspect) {
+        // imagem mais larga que o necessário
+        cropWidth = img.height * targetAspect;
+        offsetX = (img.width - cropWidth) / 2;
+      } else {
+        // imagem mais alta que o necessário
+        cropHeight = img.width / targetAspect;
+        offsetY = (img.height - cropHeight) / 2;
+      }
+
+      // Criar canvas com 1000x1500
+      const canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 1500;
+      const ctx = canvas.getContext('2d');
+
+      ctx.drawImage(
+        img,
+        offsetX, offsetY, cropWidth, cropHeight,
+        0, 0, 1000, 1500
+      );
+
+      // Criar preview e link para download
+      const selectedFormat = outputFormat.value;
+      const mimeType = selectedFormat === 'webp' ? 'image/webp' : 'image/jpeg';
+      const fileExtension = selectedFormat === 'webp' ? 'webp' : 'jpg';
+      
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const fileName = `imagem_1000x1500_${file.name.split('.')[0]}.${fileExtension}`;
+        
+        // Adicionar à lista de imagens processadas
+        processedImages.push({
+          blob: blob,
+          fileName: fileName,
+          url: url
+        });
+
+        // Criar elemento visual
+        const imageItem = document.createElement('div');
+        imageItem.className = 'image-item';
+        
+        const preview = document.createElement('img');
+        preview.src = url;
+        preview.className = 'image-preview';
+        preview.alt = fileName;
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.textContent = `📥 ${fileName}`;
+        link.className = 'download-link';
+        
+        const originalSize = document.createElement('p');
+        originalSize.innerHTML = `<small>Original: ${img.width}×${img.height}<br>Final: 1000×1500 (${selectedFormat.toUpperCase()})</small>`;
+        originalSize.style.margin = '10px 0 5px 0';
+        originalSize.style.color = '#666';
+        
+        imageItem.appendChild(preview);
+        imageItem.appendChild(originalSize);
+        imageItem.appendChild(link);
+        resultDiv.appendChild(imageItem);
+        
+        processedFiles++;
+        updateProgress();
+        updateStats();
+        
+        if (processedFiles === totalFiles) {
+          downloadAllBtn.style.display = 'block';
+          progressDiv.innerHTML = '✅ Processamento concluído!';
+        }
+      }, mimeType, selectedFormat === 'webp' ? 0.95 : 0.92);
+    }
+
+    function updateProgress() {
+      const percentage = totalFiles > 0 ? Math.round((processedFiles / totalFiles) * 100) : 0;
+      progressDiv.innerHTML = `Processando... ${processedFiles}/${totalFiles} (${percentage}%)`;
+    }
+
+    function updateStats() {
+      const totalSize = processedImages.reduce((sum, img) => sum + img.blob.size, 0);
+      const avgSize = totalSize / processedImages.length || 0;
+      
+      statsDiv.innerHTML = `
+        <strong>Estatísticas:</strong> 
+        ${processedImages.length} imagens processadas | 
+        Tamanho total: ${formatFileSize(totalSize)} | 
+        Tamanho médio: ${formatFileSize(avgSize)}
+      `;
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function downloadAll() {
+      if (processedImages.length === 0) return;
+      
+      downloadAllBtn.disabled = true;
+      downloadAllBtn.innerHTML = '📦 Preparando ZIP...';
+      
+      try {
+        const zip = new JSZip();
+        
+        // Adicionar todas as imagens ao ZIP
+        processedImages.forEach(img => {
+          zip.file(img.fileName, img.blob);
+        });
+        
+        downloadAllBtn.innerHTML = '📦 Gerando ZIP...';
+        
+        // Gerar o arquivo ZIP
+        const zipBlob = await zip.generateAsync({
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+        
+        // Criar link para download do ZIP
+        const selectedFormat = outputFormat.value;
+        const zipFileName = `imagens_1000x1500_${selectedFormat}_${new Date().toISOString().slice(0,10)}.zip`;
+        
+        const zipUrl = URL.createObjectURL(zipBlob);
+        const zipLink = document.createElement('a');
+        zipLink.href = zipUrl;
+        zipLink.download = zipFileName;
+        document.body.appendChild(zipLink);
+        zipLink.click();
+        document.body.removeChild(zipLink);
+        
+        // Limpar URL
+        setTimeout(() => URL.revokeObjectURL(zipUrl), 1000);
+        
+      } catch (error) {
+        alert('Erro ao criar arquivo ZIP: ' + error.message);
+      } finally {
+        downloadAllBtn.disabled = false;
+        downloadAllBtn.innerHTML = '📦 Baixar Todas as Imagens (ZIP)';
+      }
+    }
+
+    // Limpar URLs quando a página for fechada
+    window.addEventListener('beforeunload', () => {
+      processedImages.forEach(img => URL.revokeObjectURL(img.url));
+    });
   </script>
 </body>
 </html>
