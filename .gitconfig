@@ -1,20 +1,20 @@
-  [user]
-    name = Fulano de Tal
-    email = fulanodetal@kabum.com.br
-  [core]
-    editor = code --wait
-  [push]
-    followTags = true
-  [alias]
-    c = !git add --all && git commit -m
-    s = !git status -s
-    l = !git log --graph --pretty=format:'%C(blue)%h %C(red)%d %C(white)%s - %C(cyan)%cn, %C(green)%cr'
-    ck = !git checkout
-    ckb = !git checkout -b
-    wip = !git c 'chore: wip' --no-verify
-    chama = !git fetch && git pull --rebase
-    amend = !git add --all && git commit --amend --no-edit
-    count = !git shortlong -s --grep
-    delb = !git branch -D
-  [push]
-    autoSetupRemote = true
+[user]
+  name = Fulano de Tal
+  email = fulanodetal@kabum.com.br
+[core]
+	editor = code --wait
+[push]
+	followTags = true
+	autoSetupRemote = true
+[alias]
+	c = !git add --all && git commit -m
+	s = !git status -s
+	l = !git log --graph --pretty=format:'%C(blue)%h %C(red)%d %C(white)%s - %C(cyan)%cn, %C(green)%cr'
+	ck = !git checkout
+	ckb = !git checkout -b
+	wip = !git c 'chore: wip' --no-verify
+	chama = !git fetch && git pull --rebase
+	amend = !git add --all && git commit --amend --no-edit
+	count = !git shortlong -s --grep
+	delb = !git branch -D
+	
